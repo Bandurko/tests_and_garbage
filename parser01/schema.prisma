@@ -1,0 +1,24 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:dataBase.db"
+}
+
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+model Record {
+  id           Int     @id @default(autoincrement())
+  addres       String  @default("")
+  lat          Float   @default(0)
+  lon          Float   @default(0)
+  floor        Int     @default(1)
+  square       Float   @default(0)
+  rooms        Int     @default(1)
+  price        BigInt  @default(0)
+  description  String  @default("")
+  photos       String  @default("")
+  link         String  @default("")
+}
