@@ -1,7 +1,12 @@
 import requests
+import re
 from bs4 import BeautifulSoup
 import time
 import json
+
+
+
+distr = 'Первомайский'
 
 floats = []
 headers = {
@@ -11,6 +16,7 @@ headers = {
 
 for i in range(0, 1):
     url = f'https://vladivostok.cian.ru/cat.php?currency=2&deal_type=sale&engine_version=2&offer_type=flat&p={i}&region=4701&room1=1&room2=1&type=4'
+
     q = requests.get(url=url, headers=headers)
     result = q.text
 
@@ -34,15 +40,16 @@ floats = sorter
 # print(floats)
 # time.sleep(1)
 
-with open('floats.txt', 'w', encoding='utf-8') as file:
+with open('links.txt', 'w', encoding='utf-8') as file:
     for line in floats:
         res = file.write(f'{line}\n')
 
 # ======================
 
-with open('floats.txt') as file:
+with open('links.txt') as file:
     lines = [line.strip() for line in file.readlines()]
 
+    # distr = 'Первомайский'
     data_flats = []
     count = 0
     for line in lines:
@@ -55,15 +62,44 @@ with open('floats.txt') as file:
         print(q.status_code)
 
         address = soup.find('meta', property='og:description')
-        price = soup.find('div', {'data-name': 'OfferFactItem'})
+
+        elements_with_class_example = soup.find_all('div', {'data-name': 'ObjectFactoidsItem'})
+
+        for element in elements_with_class_example:
+            dat = element.text.replace(" ", "")
+
+            # print(dat)
+
+            if "Этаж" in dat:
+                idk = dat[dat.find("Этаж") + 4:]
+                etaz = int(idk[:idk.find("из")])
+            else:
+                continue
+
+        words = address['content'].split()
+        find_word = "р-н"
+        index_word = -1
+        if find_word in words:
+            index_word = words.index(find_word)
+        district = (words[index_word + 1][:-1:])
+
+        price_parse = (soup.find('div', {'data-name': 'OfferFactItem'})).text[12:-5:]
+
+        price = int("".join(price_parse.split()))
 
         # print(price.text[12:-5:])
         # time.sleep(1)
 
-        data = {
-            'address': address['content'],
-            'price': price.text[12:-5:],
-        }
+        if district == distr:
+
+            data = {
+                'address': address['content'],
+                'district': district,
+                'etaz': etaz,
+                'price': price,
+            }
+        else:
+            continue
 
         count += 1
         print(f'#{count}: {line} is done!')
