@@ -8,6 +8,10 @@ import json
 
 distr = 'Первомайский'
 
+# area = []
+# rooms = []
+# price = []
+
 floats = []
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.133 Safari/537.36"
@@ -15,7 +19,7 @@ headers = {
 
 
 for i in range(0, 1):
-    url = f'https://vladivostok.cian.ru/cat.php?currency=2&deal_type=sale&engine_version=2&offer_type=flat&p={i}&region=4701&room1=1&room2=1&type=4'
+    url = f'https://vladivostok.cian.ru/cat.php?currency=2&deal_type=sale&engine_version=2&offer_type=flat&p={i}&region=4701&room1=1&room2=1&room3=1&room4=1&room5=1&type=4'
 
     q = requests.get(url=url, headers=headers)
     result = q.text
@@ -49,9 +53,13 @@ with open('links.txt', 'w', encoding='utf-8') as file:
 with open('links.txt') as file:
     lines = [line.strip() for line in file.readlines()]
 
-    # distr = 'Первомайский'
     data_flats = []
     count = 0
+
+    area = []
+    rooms = []
+    price = []
+
     for line in lines:
         print(line)
         q = requests.get(line, headers=headers)
@@ -62,6 +70,27 @@ with open('links.txt') as file:
         print(q.status_code)
 
         address = soup.find('meta', property='og:description')
+
+        rooms_and_area = soup.find('div', {'data-name': 'OfferTitleNew'})
+
+        for el in rooms_and_area:
+            title = el.text.replace(" ", "")
+
+            # print(title)
+
+            if "Продается" in title:
+                idk1 = title[title.find("Продается") + 9:]
+                r = int(idk1[:idk1.find("-")])
+                rooms.append(r)
+            else:
+                continue
+
+            if "квартира," in title:
+                idk2 = title[title.find("квартира,") + 9:]
+                a = float((idk2[:idk2.find("м²")]).replace(',', '.'))
+                area.append(a)
+            else:
+                continue
 
         elements_with_class_example = soup.find_all('div', {'data-name': 'ObjectFactoidsItem'})
 
@@ -83,9 +112,14 @@ with open('links.txt') as file:
             index_word = words.index(find_word)
         district = (words[index_word + 1][:-1:])
 
-        price_parse = (soup.find('div', {'data-name': 'OfferFactItem'})).text[12:-5:]
+        price_parse = (soup.find('div', {'data-testid': 'price-amount'})).text[:-2:]
 
-        price = int("".join(price_parse.split()))
+        p = int("".join(price_parse.split()))
+        price.append(p)
+
+        price_per_meter_parse = (soup.find('div', {'data-name': 'OfferFactItem'})).text[12:-5:]
+
+        price_per_meter = int("".join(price_per_meter_parse.split()))
 
         # print(price.text[12:-5:])
         # time.sleep(1)
@@ -96,7 +130,10 @@ with open('links.txt') as file:
                 'address': address['content'],
                 'district': district,
                 'etaz': etaz,
-                'price': price,
+                'rooms': r,
+                'area': a,
+                'price': p,
+                'price_per_meter': price_per_meter,
             }
         else:
             continue
@@ -108,4 +145,8 @@ with open('links.txt') as file:
 
         with open('flats.json', 'w', encoding='utf-8') as json_file:
             json.dump(data_flats, json_file, indent=4, ensure_ascii=False)
-            
+
+X_area = list(area)
+print(X_area)
+print(rooms)
+print(price)
