@@ -6,6 +6,10 @@ from sklearn.linear_model import LinearRegression
 
 # Задаем нужный район города
 distr = 'Фрунзенский'
+# Задаем площадь квартиры (кв. м)
+flat_area = 45
+# Задаем кол-во комнат в квартире
+flat_rooms = 2
 
 floats = []
 headers = {
@@ -13,7 +17,7 @@ headers = {
 }
 
 
-for i in range(0, 3): # Задаем количество страниц сайта Циан со ссылками на квартиры
+for i in range(0, 5): # Задаем количество страниц сайта Циан со ссылками на квартиры
     url = f'https://vladivostok.cian.ru/cat.php?currency=2&deal_type=sale&engine_version=2&offer_type=flat&p={i}&region=4701&room1=1&room2=1&room3=1&room4=1&room5=1&type=4'
 
     q = requests.get(url=url, headers=headers)
@@ -149,9 +153,9 @@ X = np.column_stack((X_area, X_rooms))
 model.fit(X, y)
 # Теперь модель обучена и может делать прогноз
 # Давайте спрогнозируем цену для квартиры заданной площади и кол-ва комнат
-# Задаем площадь
-house_area = 44
-# Задаем кол-во комнат в квартире
-house_rooms = 2
+# Задаем площадь квартиры (смотри в начале кода)
+house_area = flat_area
+# Задаем кол-во комнат в квартире (смотри в начале кода)
+house_rooms = flat_rooms
 predicted_price = model.predict(np.array([[house_area, house_rooms]]))
 print(f'Прогнозируемая цена квартиры площадью {house_area} кв. метров и {house_rooms} комнатами(ой): {predicted_price[0]:.2f} руб.')
