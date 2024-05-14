@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 
 # Задаем нужный район города
-distr = 'Фрунзенский'
+distr = 'Первомайский'
 # Задаем площадь квартиры (кв. м)
 flat_area = 45
 # Задаем кол-во комнат в квартире
@@ -17,8 +17,21 @@ headers = {
 }
 
 
-for i in range(0, 5): # Задаем количество страниц сайта Циан со ссылками на квартиры
+for i in range(0, 3): # Задаем количество страниц сайта Циан со ссылками на квартиры
+
+    # if flat_rooms == 1:
+    #     r = '&room1=1'
+    # elif flat_rooms == 2:
+    #     r = '&room2=1'
+    # elif flat_rooms == 3:
+    #     r = '&room3=1'
+    # elif flat_rooms == 4:
+    #     r = '&room4=1'
+    # elif flat_rooms >= 5:
+    #     r = '&room5=1'
+
     url = f'https://vladivostok.cian.ru/cat.php?currency=2&deal_type=sale&engine_version=2&offer_type=flat&p={i}&region=4701&room1=1&room2=1&room3=1&room4=1&room5=1&type=4'
+    # url = f'https://vladivostok.cian.ru/cat.php?currency=2&deal_type=sale&engine_version=2&offer_type=flat&p={i}&region=4701{r}&type=4'
 
     q = requests.get(url=url, headers=headers)
     result = q.text
@@ -45,7 +58,7 @@ floats = sorter
 
 with open('links.txt', 'w', encoding='utf-8') as file: # Создаем файл с ссылками на квартиры (построчно)
     for line in floats:
-        res = file.write(f'{line}\n')
+        file.write(f'{line}\n')
 
 # ======================
 
@@ -123,6 +136,7 @@ with open('links.txt') as file:
             continue
 
         count += 1
+        time.sleep(3)
         print(f'#{count}: {line} is done!')
 
         if count % 11 == 0: # "Защита" от определения парсинга
